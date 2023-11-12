@@ -13,7 +13,11 @@ module Globalize
         coder = if options[:coder] == ::JSON
                   ::ActiveRecord::Coders::JSON
                 elsif options.key?(:coder)
-                  options[:coder]
+                  if coder.respond_to?(:new) && !coder.respond_to?(:load)
+                    coder.new(attr_name, type)
+                  else
+                    options[:coder]
+                  end
                 else
                   ::ActiveRecord::Coders::YAMLColumn.new(attr_name, options[:type], **(options.fetch(:yaml, {})))
                 end
