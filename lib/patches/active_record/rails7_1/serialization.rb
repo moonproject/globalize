@@ -3,19 +3,19 @@ module Globalize
     module Serialization
       def serialize(attr_name, class_name_or_coder = Object, **options)
         if class_name_or_coder == ::JSON || [:load, :dump].all? { |x| class_name_or_coder.respond_to?(x) }
-          options = options.merge(coder: class_name_or_coder)
+          options = options.merge(coder: class_name_or_coder, type: Object)
         else
           options = options.merge(type: class_name_or_coder)
         end
 
         super(attr_name, **options)
 
-        coder = if class_name_or_coder == ::JSON
+        coder = if options[:coder] == ::JSON
                   ::ActiveRecord::Coders::JSON
-                elsif [:load, :dump].all? { |x| class_name_or_coder.respond_to?(x) }
-                  class_name_or_coder
+                elsif options.key?(:coder)
+                  options[:coder]
                 else
-                  ::ActiveRecord::Coders::YAMLColumn.new(attr_name, class_name_or_coder)
+                  ::ActiveRecord::Coders::YAMLColumn.new(attr_name, options[:type], **(options.fetch(:yaml, {})))
                 end
 
         self.globalize_serialized_attributes = globalize_serialized_attributes.dup
