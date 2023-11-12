@@ -1,15 +1,21 @@
 module Globalize
   module AttributeMethods
     module Serialization
-      def serialize(attr_name, type: Object, **options)
-        super(attr_name, type: type, **options)
+      def serialize(attr_name, class_name_or_coder = Object, **options)
+        if class_name_or_coder == ::JSON || [:load, :dump].all? { |x| class_name_or_coder.respond_to?(x) }
+          options = options.merge(coder: class_name_or_coder)
+        else
+          options = options.merge(type: class_name_or_coder)
+        end
 
-        coder = if type == ::JSON
+        super(attr_name, **options)
+
+        coder = if class_name_or_coder == ::JSON
                   ::ActiveRecord::Coders::JSON
-                elsif [:load, :dump].all? { |x| type.respond_to?(x) }
-                  type
+                elsif [:load, :dump].all? { |x| class_name_or_coder.respond_to?(x) }
+                  class_name_or_coder
                 else
-                  ::ActiveRecord::Coders::YAMLColumn.new(attr_name, type)
+                  ::ActiveRecord::Coders::YAMLColumn.new(attr_name, class_name_or_coder)
                 end
 
         self.globalize_serialized_attributes = globalize_serialized_attributes.dup
