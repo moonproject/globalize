@@ -15,11 +15,11 @@ end
 
 class JSONSerializedAttr < ActiveRecord::Base
   self.table_name = 'serialized_attrs'
-  if ::ActiveRecord.version >= Gem::Version.new("7.1.0")
-    serialize :meta, type: JSON
-  else
+  # if ::ActiveRecord.version >= Gem::Version.new("7.1.0")
+    # serialize :meta, type: JSON
+  # else
     serialize :meta, JSON
-  end
+  # end
   translates :meta
 end
 
